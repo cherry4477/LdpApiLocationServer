@@ -1,0 +1,31 @@
+CREATE TABLE `dmp_user_permissions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `user_id` int(10) unsigned DEFAULT NULL COMMENT 'userId',
+  `custname` varchar(200) DEFAULT NULL COMMENT '用户名',
+  `access_keyid` varchar(200) DEFAULT NULL COMMENT '用户 access_key_idid',
+        `secret_privatekey` varchar(200) DEFAULT NULL COMMENT '用户私钥 secret_privatekey',
+  `agent_id` int(10) unsigned DEFAULT NULL COMMENT '代理的用户id',
+  `module` varchar(200) DEFAULT NULL COMMENT '用户指数（user_index）',
+  `permissions` varchar(1000) DEFAULT NULL COMMENT '多个权限用竖线隔开',
+  `query_count` int(10) DEFAULT NULL COMMENT '查询次数',
+  `query_cycle` smallint(5) unsigned DEFAULT NULL COMMENT '查询次数计算周期，默认为1天',
+  `update_date` datetime DEFAULT NULL COMMENT '最后一次更新日期',
+  `goods_count` bigint(20) DEFAULT NULL,
+  `goods_perm` longtext,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='ldp用户权限表';
+
+
+
+grant all privileges on ldp.* to ldp@'%' identified by 'lDp123456';
+flush privileges;
+
+
+
+insert into dmp_user_permissions ( user_id,custname,access_keyid,secret_privatekey,agent_id,module,permissions,query_count,query_cycle,update_date,goods_count,goods_perm)
+values(1,'test_HXT','test_HXT','DE76950377E299FB836B41D44CC6BB04',0,0,'1|2',100000,0,'2015-11-18 15:05:09',-1,'a');
+
+
+
+insert into dmp_user_permissions( user_id,custname,access_keyid,secret_privatekey,agent_id,module,permissions,query_count,query_cycle,update_date,goods_count,goods_perm)
+select 4,custname,access_keyid,secret_privatekey,agent_id,module,permissions,query_count,query_cycle,update_date,goods_count,goods_perm from dmp_user_permissions where user_id=2;
