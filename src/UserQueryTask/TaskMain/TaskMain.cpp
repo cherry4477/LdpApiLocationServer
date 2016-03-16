@@ -197,7 +197,7 @@ int CTaskMain::BdxRunTask(BDXREQUEST_S& stRequestInfo, BDXRESPONSE_S& stResponse
 	*/			
 				return BdxSendEmpyRespones(errValue);
 		 }
-
+		return BdxSendEmpyRespones(strErrorMsg);
 	}
 	return iRes;
 }
@@ -382,6 +382,11 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 							printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());	
 							return OTHERERROR;
 						}
+						else
+						{
+							strAccessPrivatekey = iter->second.mResToken;
+
+						}
 						
 					}
 					else
@@ -515,12 +520,9 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 			{
 				for( std::map<std::string,QUERYAPIINFO_S>::iterator itr=g_vecUrlAPIS.begin();itr!=g_vecUrlAPIS.end();itr++)
 				{
-					printf("Line:%d,itr->first=%s \n",__LINE__,itr->first.c_str());
-					printf("Line:%d,strParams.c_str=%s\n",__LINE__,strParams.c_str());
-					printf("Line:%d,itr->second.mParam=%s\n",__LINE__,itr->second.mParam);
-					
 					if(atoi(itr->second.mParam) == strSource)  //????
 					{
+						printf("9999999999999999\n");
 						strHost=itr->first;
 						remoteIp.assign(itr->first,0,itr->first.find(":",0));
 						remotePort = atoi(itr->first.substr(itr->first.find(":",0)+1).c_str());
