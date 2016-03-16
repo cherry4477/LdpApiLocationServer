@@ -224,6 +224,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 	std::string strPrivateKey="a1b2c3";
 	std::string	strMobile,strSign,strParams,strSelect,
 	ssUser,ssValue,ssKey,ssmoidValue,strUser,filterDate,strToken,strAccessKeyID,strKey,strMd5Key,strKeyType,strCST,strAccuracy,strLng,strLat,strKeyFilter,tempstrKeyFilter,strShopId,strGoodsId,strProvince,strOperator,strMoId;
+	std::string strID = "null";
 	std::string strProvinceReq,strProvinceRes,strProvinceEmptyRes,strProvinceResTag,strOperatorName;
 	std::string 
 	strTimeStamp,strLiveTime,strAccessKeyId,strAccessPrivatekey,strSinature,strTelNo,strMonth,strTelNoTemp,strCertType,strCertCode,strUserName,strAuthId,strCustName,strUserIdentity,strUserTelVerity,strHost,strRemoteValue;
@@ -334,6 +335,24 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 					strAccuracy= map_UserValueKey.find(KEY_ACCURACY)->second;
 					strLat= map_UserValueKey.find(KEY_LATITUDE)->second;
 					strLng= map_UserValueKey.find(KEY_LONGTITUDE)->second;
+
+					if(atoi(strKeyType.c_str())==2)
+					{	
+						if(map_UserValueKey.find(KEY_KEY_ID)!=map_UserValueKey.end())
+						{
+							strID= map_UserValueKey.find(KEY_KEY_ID)->second;
+						}
+						else
+						{
+							errorMsg ="1100"; //param missing or error
+							LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
+							printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());
+							return OTHERERROR;
+						}
+					}
+					
+					
+					
 
 					stResponseInfo.ssUserName=strAccessKeyId+"_"+strAction;//+"_"+strSinature;
 					//stResponseInfo.ssUserCountKeyUserLimitReq = "Limit_"+BdxTaskMainGetDate()+"_"+strAccessKeyId+"_"+strAction;
@@ -447,8 +466,8 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 						break;
 					case 2:
 						{
-							strKey = ACTION_INFO +strPrivateKey + "&accuracy=" +strAccuracy + "&lat=" + strLat+"&lng=" + strLng +"&cst=" + strCST;
-							strMd5Key = strAccuracy + "_" + strCST + "_" + strLat+ "_" + strLng;
+							strKey = ACTION_INFO +strPrivateKey + "&id=" +strID;//"&accuracy=" +strAccuracy + "&lat=" + strLat+"&lng=" + strLng +"&cst=" + strCST;
+							strMd5Key = strAccuracy + "_" + strCST + "_" + strLat+ "_" + strLng+"_"+strID;
 						}
 						break;
 					case 3:
@@ -545,7 +564,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 					if(strSource==9999)
 					{
 						iQueryCategory = 1; // remote
-						sprintf(m_httpReq,"GET %s HTTP/1.1\r\nHost: %s\r\nAccept-Encoding: identity\r\n\r\n",strKey.c_str(),strHost.c_str());
+						sprintf(m_httpReq,"GET %s HTTP/1.1\r\nHost: %s\r\nAccept-Encoding: identity\r\n\r\n",strKey.c_str(),string("bapi.caiyun001.net").c_str());
 					}
 
 					printf("Line:%d,%s\n",__LINE__,m_httpReq);

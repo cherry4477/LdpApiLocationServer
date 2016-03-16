@@ -77,6 +77,7 @@
 #define KEY_TIME_STAMP "timeStamp"
 #define KEY_LIVE_TIME "liveTime"
 #define KEY_ACCESS_KEY_ID "accessKeyID"
+#define KEY_KEY_ID "id"
 #define KEY_MONTH "month"
 #define KEY_SIGNATURE "signature"
 #define KEY_CST "cst"
