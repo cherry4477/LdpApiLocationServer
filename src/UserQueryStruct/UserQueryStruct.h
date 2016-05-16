@@ -76,14 +76,24 @@
 #define KEY_TEL_LIFE_QUERY	"/api/credit/telServiceLifeQuery"
 #define KEY_TIME_STAMP "timeStamp"
 #define KEY_LIVE_TIME "liveTime"
-#define KEY_ACCESS_KEY_ID "accessKeyID"
+//#define KEY_ACCESS_KEY_ID "accessKeyID"
+#define KEY_ACCESS_KEY_ID "authuser"
+
+#define KEY_API_NAME "apiName"
+
 #define KEY_KEY_ID "id"
 #define KEY_MONTH "month"
-#define KEY_SIGNATURE "signature"
+//#define KEY_SIGNATURE "signature"
+#define KEY_SIGNATURE "token"
+
 #define KEY_CST "cst"
 #define KEY_ACCURACY "accuracy"
 #define KEY_LATITUDE "lat"
 #define KEY_LONGTITUDE "lng"
+#define KEY_REPOSITIRY "repo"
+#define KEY_ITEM "item"
+
+
 
 #define ACTION_HERE   "/api/landmark/here?appkey="
 #define ACTION_INFO   "/api/landmark/info?appkey="
@@ -177,6 +187,13 @@ typedef struct {
 	std::string m_strStatisticsFileName;
 	u_int m_uiStatisticsTime;
 }STATISTICSPRM_S;
+
+typedef struct {
+	std::string m_expireTime;
+	std::string m_subscriptionID;
+	std::string m_units;
+}DATAHUB_ORDER_INFO_S;
+
 
 typedef struct UserInfo{
 	

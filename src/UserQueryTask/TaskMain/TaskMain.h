@@ -29,12 +29,17 @@ public:
 	std::string BdxTaskMainGetDate(const time_t ttime = 0);
 	std::string BdxTaskMainGetLastTwoMonth(const time_t ttime = 0);
 	string   BdxTaskMainReplace_All(string    str,   string   old_value,   string   new_value);
-
 	std::string BdxTaskMainGetTime(const time_t ttime = 0);
 	std::string BdxTaskMainGetMinute(const time_t ttime = 0);
 	std::string BdxTaskMainGetFullTime(const time_t ttime=0);
 	std::string BdxTaskMainGetUCTime(const time_t ttime = 0);
 	std::string BdxGenNonce(int length);
+	std::vector<DATAHUB_ORDER_INFO_S> BdxApiGetUserOrder(std::string repo,std::string item,std::string user,std::string apitoken);
+	bool BdxApiSetUserOrderStatus(std::string user,std::string subid,std::string repo,std::string item,std::string token);
+	std::string BdxApiUpdateUserOrder(std::string user,std::string subid,std::string repo,std::string item,std::string token,long used) ;
+	std::string BdxGetDatafromDataHub(std::string AuthUser,std::string AuthToken,std::string repo,std::string item,std::string subid,long used,int type);
+	int BdxVerifyDataHubToken(std::string AuthUser,std::string AuthToken);
+	std::string BdxApiGateWayGetDataHubToken(std::string AuthUser="",std::string PassWord="") ;
 	std::string GenPasswordDigest(std::string utcTime, std::string nonce, std::string appSecret);
 	std::string BdxGetParamSign(const std::string& strParam, const std::string& strSign);
 private:
@@ -49,6 +54,7 @@ private:
 	CMd5 md5;
 	int m_httpType ;
 	CConf  mConf;	
+	std::map<std::string,std::string> map_UserValueKey;
 	std::map<std::string,std::string> m_mapUserValue;
 	//CTime m_cTime;
 	

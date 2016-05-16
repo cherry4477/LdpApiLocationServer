@@ -28,7 +28,7 @@ CTcpSocket::CTcpSocket(const in_port_t in_portPort, const std::string& strIp, co
  : m_in_portPort(in_portPort), m_strIp(strIp), m_uiTimeout(uiTimeout)
 {	
 	m_iSockfd = socket(AF_INET, SOCK_STREAM, 0);
-	//printf("create m_iSockfd=%d\n",m_iSockfd);
+	printf("Line:%d,create m_iSockfd=%d\n",__LINE__,m_iSockfd);
 	if (m_iSockfd == -1) {
 		throw std::runtime_error("get socketfd error.");
 	}
@@ -399,7 +399,7 @@ bool CTcpSocket:: TcpClose()
 	setsockopt(m_iSockfd,SOL_SOCKET,SO_LINGER,&so_linger,sizeof(so_linger));
 	//printf("m_bConnect=%d,m_iSockfd=%d\n",m_bConnect,m_iSockfd);
 	if(m_bConnect) {
-	//printf("before close socket %d\n",m_iSockfd);
+	printf("Line:%d,before close socket %d\n",__LINE__,m_iSockfd);
 		if(m_iSockfd != -1)
 		{
 			::close(m_iSockfd);
@@ -407,7 +407,7 @@ bool CTcpSocket:: TcpClose()
 		}
 		m_bConnect = false;
 	}
-	//printf("after close socket %d\n",m_iSockfd);
+	printf("Line:%d,after close socket %d\n",__LINE__,m_iSockfd);
 	return true;
 }
 int CTcpSocket::EncodingBase64(char * pInput, char * pOutput)
@@ -752,7 +752,7 @@ int CTcpSocket::TcpSslInitEnv()
 		ssl_ctx = SSL_CTX_new(SSLv23_client_method());
 		//ssl_ctx = SSL_CTX_new(TLSv1_method());
 	  				
-	  				#if 1
+	  				#if 0   //is verify certification
 						/* Load the RSA CA certificate into the SSL_CTX structure */
 						/* This will allow this client to verify the server's   */
 						/* certificate.                             */
@@ -774,7 +774,7 @@ int CTcpSocket::TcpSslInitEnv()
 								ERR_print_errors_fp(stderr);	
 						}
 								 
-						#endif
+					#endif
 		ssl = SSL_new(ssl_ctx);
 	//openssl的文档上也明文规定不能将一个SSL指针用于多个线程，所有调用CreateThread函数创建线程，参数设置为SSL指针必然在线程中是互斥的，考虑运用windows开源库pthread改造多线程
 		return 0;

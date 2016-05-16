@@ -68,6 +68,37 @@ bool CDataAdapter::UserGet(string &uid,string &rule) {
 	return data_[idx].GetValue(uid.c_str(),rule);
 }
 
+bool CDataAdapter::UserGetSortedSet(string &uid,string &rule) {
+	//uint64_t postkey = m_clMd5.md5_sum((unsigned char *)(uid.c_str()),uid.length());
+	
+	m_clMd5.Md5Init();    
+	m_clMd5.Md5Update((unsigned char *)uid.c_str(),uid.length());
+	unsigned char  pszParamSign[16];    
+	m_clMd5.Md5Final(pszParamSign);
+	unsigned long int postkey = *(unsigned long int*)pszParamSign;
+	
+	uint32_t idx = postkey % serv_count_;
+
+	MutexLock lock(&lock_[idx]);
+
+	return data_[idx].GetValueSortedSet(uid.c_str(),rule);
+}
+bool CDataAdapter::UserRemoveSortedSet(string &uid,string &rule) {
+	//uint64_t postkey = m_clMd5.md5_sum((unsigned char *)(uid.c_str()),uid.length());
+	
+	m_clMd5.Md5Init();    
+	m_clMd5.Md5Update((unsigned char *)uid.c_str(),uid.length());
+	unsigned char  pszParamSign[16];    
+	m_clMd5.Md5Final(pszParamSign);
+	unsigned long int postkey = *(unsigned long int*)pszParamSign;
+	
+	uint32_t idx = postkey % serv_count_;
+
+	MutexLock lock(&lock_[idx]);
+
+	return data_[idx].RemoveSortedSet(uid.c_str(),rule);
+}
+
 bool CDataAdapter::UserIncr(string &uid,int32_t itime_expire) {
 	//uint64_t postkey = m_clMd5.md5_sum((unsigned char *)(uid.c_str()),uid.length());
 	
@@ -112,6 +143,33 @@ bool CDataAdapter::UserPut(string &uid,const string &rule) {
 	uint32_t idx = postkey % serv_count_;
 	MutexLock lock(&lock_[idx]);
 	return data_[idx].SetValue(uid.c_str(),rule.c_str(),-1);
+}
+bool CDataAdapter::UserDel(string &uid,const string &rule) {
+	//uint64_t postkey = md5_sum((uid.c_str()),uid.length());
+	m_clMd5.Md5Init();    
+	m_clMd5.Md5Update((unsigned char *)uid.c_str(),uid.length());
+	unsigned char  pszParamSign[16];    
+	m_clMd5.Md5Final(pszParamSign);
+	unsigned long int postkey = *(unsigned long int*)pszParamSign;
+
+	
+	uint32_t idx = postkey % serv_count_;
+	MutexLock lock(&lock_[idx]);
+	return data_[idx].DelValue(uid.c_str(),rule.c_str(),-1);
+}
+
+bool CDataAdapter::UserPutOrderSet(string &key,const string &score,const string &member) {
+	//uint64_t postkey = md5_sum((uid.c_str()),uid.length());
+	m_clMd5.Md5Init();    
+	m_clMd5.Md5Update((unsigned char *)score.c_str(),score.length());
+	unsigned char  pszParamSign[16];    
+	m_clMd5.Md5Final(pszParamSign);
+	unsigned long int postkey = *(unsigned long int*)pszParamSign;
+
+	
+	uint32_t idx = postkey % serv_count_;
+	MutexLock lock(&lock_[idx]);
+	return data_[idx].SetValueSortedSet(key.c_str(),score.c_str(),member.c_str());
 }
 
 bool CDataAdapter::UserPutExpire(string &uid,const string &rule,int32_t expiration) {

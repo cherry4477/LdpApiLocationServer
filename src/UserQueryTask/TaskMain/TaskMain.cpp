@@ -47,6 +47,7 @@ static const char httpReq[]="GET %s HTTP/1.1\r\nHost: %s\r\nAccept-Encoding: ide
 #define __NOLOCAL__
 #define __MD5__
 #define __LOCAL_STORE__
+#define __HTTPS__
 
 
 CTaskMain::CTaskMain(CTcpSocket* pclSock):CUserQueryTask(pclSock)
@@ -223,12 +224,15 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 	
 	std::string strPrivateKey="a1b2c3";
 	std::string	strMobile,strSign,strParams,strSelect,
-	ssUser,ssValue,ssKey,ssmoidValue,strUser,filterDate,strToken,strAccessKeyID,strKey,strMd5Key,strKeyType,strCST,strAccuracy,strLng,strLat,strKeyFilter,tempstrKeyFilter,strShopId,strGoodsId,strProvince,strOperator,strMoId;
+	ssUser,ssValue,ssKey,ssmoidValue,ssmoidValue2,strUser,filterDate,strToken,strAccessKeyID,strKey,strMd5Key,strKeyType,strCST,strAccuracy,strLng,strLat,strKeyFilter,tempstrKeyFilter,strShopId,strGoodsId,strProvince,strOperator,strMoId,strRepo,strItem,strDataHubToken;
 	std::string strID = "null";
 	std::string strProvinceReq,strProvinceRes,strProvinceEmptyRes,strProvinceResTag,strOperatorName;
 	std::string 
-	strTimeStamp,strLiveTime,strAccessKeyId,strAccessPrivatekey,strSinature,strTelNo,strMonth,strTelNoTemp,strCertType,strCertCode,strUserName,strAuthId,strCustName,strUserIdentity,strUserTelVerity,strHost,strRemoteValue;
+	strTimeStamp,strApiName,strLiveTime,strAccessKeyId,strUserToken,strUserOrderId,strApiGateWayToken,strAccessPrivatekey,strSinature,strTelNo,strMonth,strTelNoTemp,strCertType,strCertCode,strUserName,strAuthId,strCustName,strUserIdentity,strUserTelVerity,strHost,strRemoteValue;
 	std::map<std::string,std::string> map_UserValueKey;
+	std::vector<DATAHUB_ORDER_INFO_S> vecDataHubOrder;
+	std::string strCountOrderId,strLimitOrderId,strStatusOrderId,strExpireOrderId,strTempSubID;
+	std::string strMidCountOrderId,strMidLimitOrderId,strMidStatusOrderId,strMidExpireOrderId,strMidTempSubID;
 	std::map<std::string,std::string>::iterator iter2;
 	std::map<std::string,BDXPERMISSSION_S>::iterator iter;
 	std::vector<std::string>::iterator itRights;
@@ -238,7 +242,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 	std::string mResUserAttributes,mResUserAttributes2,strTempValue;
 	Json::Value jValue,jRoot,jResult,jTemp;
 	
-	int lenStrTemp;
+	int lenStrTemp,iLimitOrderId,iCountOrderId;
 	Json::FastWriter jFastWriter;
 	//int isExpire = 0, iIsLocal=0,iRemoteApiFlag = 0;
 	//int iOperator = 0;
@@ -269,7 +273,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 	iRes = m_pclSock->TcpRead(m_pszAdxBuf, _8KBLEN);
 
   	LOG(DEBUG,"Requrest= %s\n",m_pszAdxBuf);  
-	printf("ThreadID: %d,Line%d,Requrest= %s\n",m_uiThreadId,__LINE__,m_pszAdxBuf);  
+	//printf("ThreadID: %d,Line%d,Requrest= %s\n",m_uiThreadId,__LINE__,m_pszAdxBuf);  
 	if(iRes <= (int)http.length()) 
 	{		
 		LOG(DEBUG, "[thread: %d]Read Socket Error [%d].", m_uiThreadId, iRes);
@@ -324,17 +328,18 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 				    buf=NULL;  
 				}  
 				
-				if(map_UserValueKey.find(KEY_ACCESS_KEY_ID)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_TIME_STAMP)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_LIVE_TIME)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_OPERATOR)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_SIGNATURE)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_CST)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_ACCURACY)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_LATITUDE)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_LONGTITUDE)!=map_UserValueKey.end())
+				if(map_UserValueKey.find(KEY_ACCESS_KEY_ID)!=map_UserValueKey.end()/*&&map_UserValueKey.find(KEY_API_NAME)!=map_UserValueKey.end()*/&&map_UserValueKey.find(KEY_SIGNATURE)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_OPERATOR)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_CST)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_ACCURACY)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_LATITUDE)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_LONGTITUDE)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_REPOSITIRY)!=map_UserValueKey.end()&&map_UserValueKey.find(KEY_ITEM)!=map_UserValueKey.end())
 				{	
 					strAccessKeyId = map_UserValueKey.find(KEY_ACCESS_KEY_ID)->second;
-					strTimeStamp = map_UserValueKey.find(KEY_TIME_STAMP)->second;
-					strLiveTime = map_UserValueKey.find(KEY_LIVE_TIME)->second;
+					//strApiName = map_UserValueKey.find(KEY_API_NAME)->second;
 					strSinature = map_UserValueKey.find(KEY_SIGNATURE)->second;
 					strKeyType= map_UserValueKey.find(KEY_OPERATOR)->second; //query type
 					strCST= map_UserValueKey.find(KEY_CST)->second;
 					strAccuracy= map_UserValueKey.find(KEY_ACCURACY)->second;
-					strLat= map_UserValueKey.find(KEY_LATITUDE)->second;
-					strLng= map_UserValueKey.find(KEY_LONGTITUDE)->second;
+					strLat =  map_UserValueKey.find(KEY_LATITUDE)->second;
+					strLng =  map_UserValueKey.find(KEY_LONGTITUDE)->second;
+					strRepo = map_UserValueKey.find(KEY_REPOSITIRY)->second;
+					strItem = map_UserValueKey.find(KEY_ITEM)->second;
 
 					if(atoi(strKeyType.c_str())==2)
 					{	
@@ -350,11 +355,117 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 							return OTHERERROR;
 						}
 					}
-					
-					
-					
+						
+						strUserToken = strAccessKeyId +std::string("_token");
+						m_pDataRedis->UserGet(strUserToken,ssmoidValue);
+				    	printf("Line:%d,strSinature=%s\n",__LINE__,strSinature.c_str());
+						printf("Line:%d,ssmoidValue=%s\n",__LINE__,ssmoidValue.c_str());
+				    	if( strSinature.compare(ssmoidValue.c_str())!= 0 )
+				    	{	
+				    		#ifdef __HTTPS__
+				    		if (BdxVerifyDataHubToken(strAccessKeyId,strSinature)==1)
+							#endif
+				    		{	
+				    			m_pDataRedis->UserPutExpire(strUserToken,strSinature,3*3600);
+							}
+							else
+							{
+								errorMsg ="8001"; //user token is error
+								printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());
+								return OTHERERROR;
+							}
+				    		//get local token,if verify is not ok,then get new token
+							//BdxGetNewDataHubToken(authUser,authToken);						
+						}
 
-					stResponseInfo.ssUserName=strAccessKeyId+"_"+strAction;//+"_"+strSinature;
+						std::string apiGateWayAdmin = "chenyg@asiainfo.com";
+						strApiGateWayToken = apiGateWayAdmin +std::string("_token");
+						if(m_pDataRedis->UserGet(strApiGateWayToken,ssmoidValue))
+						{
+							strDataHubToken  =  ssmoidValue;
+							printf("Line:%d,Local strDataHubToken =%s\n",__LINE__,strDataHubToken.c_str());
+						}
+				    	else
+				    	{	
+							#ifdef __HTTPS__
+							strDataHubToken = BdxApiGateWayGetDataHubToken();
+							#endif
+							if(strDataHubToken.empty())
+							{
+								errorMsg ="8002"; //gateway token is error
+								printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());
+								return OTHERERROR;
+							}
+							printf("Line:%d,datahub strDataHubToken =%s\n",__LINE__,strDataHubToken.c_str());
+				    		m_pDataRedis->UserPutExpire(strApiGateWayToken,strDataHubToken,3*3600);					
+						}
+
+					strUserOrderId =  strAccessKeyId +std::string("_orderid");
+
+					ssmoidValue = "";
+					
+					strMidCountOrderId   = "orderid_count_"  + strAccessKeyId + "_" + strRepo + "_" + strItem  +"_" ;
+					strMidLimitOrderId   = "orderid_limit_"  + strAccessKeyId + "_" + strRepo + "_" + strItem  +"_" ;
+					strMidStatusOrderId  = "orderid_status_" + strAccessKeyId + "_" + strRepo + "_" + strItem  +"_" ;
+					strMidExpireOrderId  = "orderid_expire_" + strAccessKeyId + "_" + strRepo + "_" + strItem  +"_" ;
+
+					if(m_pDataRedis->UserGetSortedSet(strUserOrderId,ssmoidValue))
+					{
+						strCountOrderId = strMidCountOrderId + ssmoidValue;
+						strLimitOrderId = strMidLimitOrderId + ssmoidValue;
+						strStatusOrderId = strMidStatusOrderId + ssmoidValue;
+						strExpireOrderId = strMidExpireOrderId + ssmoidValue;
+						strTempSubID = ssmoidValue;
+						
+
+						printf("Line:%d,Order is  =%s\n",__LINE__,ssmoidValue.c_str());
+					}
+					else
+					{	
+						printf("Line:%d,get datahub Order\n",__LINE__);
+						//get user order
+						vecDataHubOrder = BdxApiGetUserOrder(strRepo,strItem,strAccessKeyId,strDataHubToken);
+						printf("Line:%d,vecDataHubOrder size=%d\n",__LINE__,vecDataHubOrder.size());
+
+						//local store order info to redis
+						for(int i=0;i<vecDataHubOrder.size();i++)
+						{
+							m_pDataRedis->UserPutOrderSet(strUserOrderId,vecDataHubOrder[i].m_subscriptionID,vecDataHubOrder[i].m_subscriptionID);
+							strCountOrderId = strMidCountOrderId + vecDataHubOrder[i].m_subscriptionID;
+							strLimitOrderId = strMidLimitOrderId + vecDataHubOrder[i].m_subscriptionID;
+							strStatusOrderId = strMidStatusOrderId + vecDataHubOrder[i].m_subscriptionID;
+							strExpireOrderId = strMidExpireOrderId + vecDataHubOrder[i].m_subscriptionID;
+							strTempSubID = vecDataHubOrder[i].m_subscriptionID;
+							m_pDataRedis->UserPut(strCountOrderId,std::string("0"));
+							m_pDataRedis->UserPutExpire(strExpireOrderId,vecDataHubOrder[i].m_subscriptionID,atol(vecDataHubOrder[i].m_expireTime.c_str())*86400);
+							m_pDataRedis->UserPut(strLimitOrderId,vecDataHubOrder[i].m_units);
+							m_pDataRedis->UserPut(strStatusOrderId,std::string("0"));							
+							if(!BdxApiSetUserOrderStatus(strAccessKeyId,strTempSubID,strRepo,strItem,strDataHubToken))
+							{	
+								//update datahub status retrieve faild,then jump it
+								printf("Line:%d,BdxApiSetUserOrderStatus\n",__LINE__);
+								m_pDataRedis->UserRemoveSortedSet(strUserOrderId,ssmoidValue);
+								//m_pDataRedis->UserDel(strCountOrderId,std::string("0"));
+								//m_pDataRedis->UserDel(strExpireOrderId,vecDataHubOrder[i].m_subscriptionID);
+								//m_pDataRedis->UserDel(strLimitOrderId,vecDataHubOrder[i].m_units);
+								//m_pDataRedis->UserDel(strStatusOrderId,std::string("0"));	
+								continue;
+							}
+
+						}
+			
+					}
+
+					#if 0
+					if(strApiName != "location")
+					{
+						errorMsg ="1100"; //param missing or error
+						LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
+						printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());
+						return OTHERERROR;
+					}
+					#endif
+					stResponseInfo.ssUserName=strAccessKeyId+"_"+strKeyType;//+"_"+strSinature;
 					//stResponseInfo.ssUserCountKeyUserLimitReq = "Limit_"+BdxTaskMainGetDate()+"_"+strAccessKeyId+"_"+strAction;
 					stResponseInfo.ssUserCountKeyUserLimitReq = "Limit_"+strAccessKeyId;
 					stResponseInfo.ssOperatorNameKeyLimit = "Limit_"+BdxTaskMainGetTime()+"_"+strAccessKeyId;//+"_"+strAction;
@@ -371,12 +482,75 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 
 					m_pDataRedis->UserIncr(stResponseInfo.ssUserCountKeyUserLimitReq);
 					CUserQueryWorkThreads::m_vecReport[m_uiThreadId].m_strUserInfo[stResponseInfo.ssUserName].m_ullResTagNum++;
+				
+					printf("Line:%d,ssmoidValue=%s\n",__LINE__,ssmoidValue.c_str());
+					ssmoidValue.clear();
+					ssmoidValue2.clear();
+					if((m_pDataRedis->UserGet(strCountOrderId,ssmoidValue))&&(m_pDataRedis->UserGet(strLimitOrderId,ssmoidValue2)))
+					{	
+						iCountOrderId = atoi(ssmoidValue.c_str());
+						iLimitOrderId = atoi(ssmoidValue2.c_str());
 
+						printf("Line:%d,iCountOrderId==%d\n",__LINE__,iCountOrderId);
+						printf("Line:%d,iLimitOrderId==%d\n",__LINE__,iLimitOrderId);
 
+						if(( iCountOrderId >= iLimitOrderId )||(!m_pDataRedis->UserGet(strExpireOrderId,ssmoidValue)))
+						{
+							printf("Line:%d,over order limit\n",__LINE__);
+							//delete order
+							ssmoidValue.clear();
+							printf("Line:%d,################################\n",__LINE__);
+							m_pDataRedis->UserRemoveSortedSet(strUserOrderId,ssmoidValue);
+
+							ssmoidValue.clear();
+							if(m_pDataRedis->UserGet(strStatusOrderId,ssmoidValue))
+							{
+								if(atoi(ssmoidValue.c_str())==0)
+								{
+									//update datahub order used
+									BdxApiUpdateUserOrder(strAccessKeyId,strTempSubID,strRepo,strItem,strDataHubToken,iCountOrderId);
+									//update local order status 
+									m_pDataRedis->UserPut(strStatusOrderId,std::string("1"));
+								}
+							
+							}		
+							errorMsg = "8003";//over quato limit or order is expired
+							LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
+							return OTHERERROR;
+						}
+					}
+					else
+					{
+							errorMsg = "8004";//can't get order info
+							LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
+							return OTHERERROR;
+
+					}
+
+					#if 0
+					else
+					{
+						//ssmoidValue = "";
+						ssmoidValue.clear();
+						if(m_pDataRedis->UserGet(strStatusOrderId,ssmoidValue))
+						{
+							if(atoi(ssmoidValue.c_str())==0)
+							{
+								//update datahub order
+							}
+
+						}
+						errorMsg = "8003";//over quato limit
+						LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
+						return OTHERERROR;
+					}
+					#endif
+						
 					//CUserQueryWorkThreads::m_vecReport[m_uiThreadId].m_strUserInfo[stResponseInfo.ssUserName].m_ullTotalReqNum++;
+					#if 0
 					if(m_pDataRedis->UserGet(stResponseInfo.ssUserCountKeyUserLimitReq,ssmoidValue)&&(g_mapUserInfo.find(map_UserValueKey.find(KEY_ACCESS_KEY_ID)->second)->second.mIntQueryTimes>=0))
 				    {	
-				    	printf("g_mapUserInfo.find(KEY_ACCESS_KEY_ID)->second.mIntQueryTimes=%d\n",g_mapUserInfo.find(strAccessKeyId)->second.mIntQueryTimes);
+				    	printf("Line:%d,g_mapUserInfo.find(KEY_ACCESS_KEY_ID)->second.mIntQueryTimes=%d\n",__LINE__,g_mapUserInfo.find(strAccessKeyId)->second.mIntQueryTimes);
 				    	LOG(DEBUG,"g_mapUserInfo.find(KEY_ACCESS_KEY_ID)->second.mIntQueryTimes=%d",g_mapUserInfo.find(strAccessKeyId)->second.mIntQueryTimes);
 						if(atoi(ssmoidValue.c_str())> g_mapUserInfo.find(strAccessKeyId)->second.mIntQueryTimes)
 						{
@@ -386,61 +560,12 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 						}
 
 					}
-
-		
 					//m_pDataRedis->UserIncr(stResponseInfo.ssUserCountKeyUserLimitReq);
 					//CUserQueryWorkThreads::m_vecReport[m_uiThreadId].m_strUserInfo[stResponseInfo.ssUserName].m_ullResTagNum++;
+
+					#endif
 					
-					iter = g_mapUserInfo.find(strAccessKeyId);
-					if(iter!=g_mapUserInfo.end())
-					{	
-					    if(iter->first != strAccessKeyId)
-					    {										    
-							errorMsg = "1200"; //accesskey id is not match
-							LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
-							printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());	
-							return OTHERERROR;
-						}
-						else
-						{
-							strAccessPrivatekey = iter->second.mResToken;
-
-						}
-						
-					}
-					else
-					{
-						errorMsg ="1200"; //accekeykey is not exists
-						LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
-						printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());
-						return OTHERERROR;
-					}
-					//verify time ,verify signature
-					time_t tmpTime = time(NULL);	//get the current time seconds
-					long int diff = tmpTime - atoi(strTimeStamp.c_str());
-					LOG(DEBUG,"tmpTime=%ld,diff=%ld,strLiveTime=%s",tmpTime,diff,strLiveTime.c_str());
-					printf("tmpTime=%ld,diff=%ld,strLiveTime=%s\n",tmpTime,diff,strLiveTime.c_str());
-					if( diff >= atoi(strLiveTime.c_str()))
-					{
-						errorMsg ="1300";
-						LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
-						printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());
-						return OTHERERROR;
-					}
-					std::string strMD5Signature;
-					//transform(strSinature.begin(), strSinature.end(), strSinature.begin(),::toupper)
-					strMD5Signature = strTimeStamp + strAccessKeyId;
-					strMD5Signature = BdxGetParamSign(strMD5Signature,strAccessPrivatekey);
-					LOG(DEBUG,"strMD5Signature=%s",strMD5Signature.c_str());
-					printf("Line:%d,strMD5Signature=%s\n",__LINE__,strMD5Signature.c_str());
-					if(strMD5Signature.compare(strSinature)!=0)
-					{
-						errorMsg ="1200";
-						LOG(DEBUG,"errorMsg=%s",errorMsg.c_str());
-						printf("line %d,s Error: %s\n",__LINE__,errorMsg.c_str());
-						return OTHERERROR;
-
-					}	
+					//verify time ,verify signature	
 					
 				 }
 				 else
@@ -724,7 +849,9 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 		#endif
 	}
 
-	
+	m_pDataRedis->UserIncr(strCountOrderId);
+	printf("Line:%d,add order count\n",__LINE__);	
+
     return SUCCESS;
 	
 }
@@ -772,7 +899,7 @@ int CTaskMain::BdxSendEmpyRespones(std::string errorMsg)
 	int iHeadLen = strlen(pszDataBuf);
 	
 	memcpy(pszDataBuf + iHeadLen, strOutput.c_str(), strOutput.length());
-	printf("Line:%d,AdAdxSendEmpyRespones=%s\n",__LINE__,pszDataBuf);
+	//printf("Line:%d,AdAdxSendEmpyRespones=%s\n",__LINE__,pszDataBuf);
 	LOG(DEBUG,"Thread : %d ,AdAdxSendEmpyRespones=%s\n",m_uiThreadId,pszDataBuf);
 	if(!m_pclSock->TcpWrite(pszDataBuf, iHeadLen + strOutput.length())) {
 		LOG(ERROR, "[tread: %d]write empty response data error.", m_uiThreadId);
@@ -955,6 +1082,231 @@ std::string CTaskMain::BdxGenNonce(int length)
             strBuffer.append(std::string(1,CHAR_ARRAY[tmp]));
         }
         return strBuffer;
+}
+
+std::string CTaskMain::BdxGetDatafromDataHub(std::string AuthUser,std::string AuthToken,std::string repo,std::string item,std::string subid,long used,int type)
+{
+	//type 1 verifytoken 2 get token 3 get order 4 update order
+	char m_httpReqVerifyToken[_8KBLEN];
+	char sslReadBuffer[_8KBLEN];
+	char tempBuffer[PACKET];
+	std::string strReadBuffer;
+	std::string datahubIP = "10.1.235.98";
+	uint16_t 	datahubPort = 443;
+	CTcpSocket* sslLocalSocket; 	
+	sslLocalSocket=new CTcpSocket(datahubPort,datahubIP);
+	memset(m_httpReqVerifyToken,0,sizeof(m_httpReqVerifyToken));
+	if( type == 1 )
+	{
+		sprintf(m_httpReqVerifyToken,"GET /api/valid HTTP/1.1\r\nHost: %s\r\nAuthorization:Token %s\r\nAuthuser: %s\r\n\r\n",datahubIP.c_str(),AuthToken.c_str(),AuthUser.c_str());
+		printf("Line:%d,BdxVerifyDataHubToken\n",__LINE__);
+	}
+	if( type == 2 )
+	{
+		sprintf(m_httpReqVerifyToken,"GET /api/ HTTP/1.1\r\nHost: %s\r\nAuthorization: Basic Y2hlbnlnQGFzaWFpbmZvLmNvbToxYmJkODg2NDYwODI3MDE1ZTVkNjA1ZWQ0NDI1MjI1MQ==\r\n\r\n",datahubIP.c_str());
+	}
+	if( type == 3 )
+	{
+		sprintf(m_httpReqVerifyToken,"GET /api/subscriptions/pull/%s/%s?username=%s HTTP/1.1\r\nHost: %s\r\nAccept: application/json; charset=utf-8\r\nAuthorization: Token %s\r\n\r\n",repo.c_str(),item.c_str(),AuthUser.c_str(),datahubIP.c_str(),AuthToken.c_str());
+	}
+	if( type == 4 )
+	{
+
+		printf("Line:%d,,,,,,,,,,,,,,,subid = %s\n",__LINE__,subid.c_str());
+		memset(tempBuffer,0,sizeof(tempBuffer));
+		sprintf(tempBuffer,"{\"action\":\"set_retrieved\",\"repname\":\"%s\",\"itemname\":\"%s\",\"username\":\"%s\"}",repo.c_str(),item.c_str(),AuthUser.c_str());
+	    //std::string putValue = std::string(tempBuffer);
+		sprintf(m_httpReqVerifyToken,"PUT /api/subscription/%s HTTP/1.1\r\nHost: %s\r\nAuthorization: Token %s\r\nContent-Length: %d\r\nAccept: application/json; charset=utf-8\r\n\r\n%s",subid.c_str(),datahubIP.c_str(),AuthToken.c_str(),std::string(tempBuffer).length(),std::string(tempBuffer).c_str());
+		printf("Line:%d,m_httpReqVerifyToken=%s\n",__LINE__,m_httpReqVerifyToken);
+
+
+	}
+	if( type == 5 )
+	{
+		memset(tempBuffer,0,sizeof(tempBuffer));
+		sprintf(tempBuffer,"{\"action\":\"set_plan_used\",\"used\":%ld,\"repname\":\"%s\",\"itemname\":\"%s\",\"username\":\"%s\"}",used,repo.c_str(),item.c_str(),AuthUser.c_str());
+	    //std::string putValue = std::string(tempBuffer);
+		sprintf(m_httpReqVerifyToken,"PUT /api/subscription/%s HTTP/1.1\r\nHost: %s\r\nAuthorization: Token %s\r\nContent-Length: %d\r\nAccept: application/json; charset=utf-8\r\n\r\n%s",subid.c_str(),datahubIP.c_str(),AuthToken.c_str(),std::string(tempBuffer).length(),std::string(tempBuffer).c_str());
+		printf("Line:%d,m_httpReqVerifyToken=%s\n",__LINE__,m_httpReqVerifyToken);
+
+	}
+
+	if(sslLocalSocket->TcpConnect()==0)
+	{
+		pthread_mutex_lock (&mutex);
+		if ( InitSSLFlag == 0 )
+		{
+			sslLocalSocket->TcpSslInitParams();
+			InitSSLFlag = 1;
+			
+		}
+		pthread_mutex_unlock(&mutex);
+		if(sslLocalSocket->TcpSslInitEnv()==0)
+		{
+			if(sslLocalSocket->TcpSslConnect())
+			{
+				if(sslLocalSocket->TcpSslWriteLen(m_httpReqVerifyToken,strlen(m_httpReqVerifyToken))!=0)
+				{
+					memset(sslReadBuffer,0,sizeof(sslReadBuffer));
+					sslLocalSocket->TcpSslReadLen(sslReadBuffer,sizeof(sslReadBuffer));
+					if( strlen(sslReadBuffer)>0 )
+					{
+						strReadBuffer = std::string(sslReadBuffer);
+						if(strReadBuffer.find("Transfer-Encoding: chunked")!=-1)
+						{
+							int itrunkStart = strReadBuffer.find("\r\n",strReadBuffer.find("\r\n\r\n")+4);
+							int itrunkEnd = strReadBuffer.find("\r\n",itrunkStart + 1);
+							strReadBuffer=strReadBuffer.substr(itrunkStart + 2 ,itrunkEnd - itrunkStart -1);
+						}
+						else
+						{
+							if(strReadBuffer.find("\r\n\r\n")!=std::string::npos)
+							{
+							  int lenStrTemp = strReadBuffer.length();
+							  strReadBuffer = strReadBuffer.substr(strReadBuffer.find("\r\n\r\n")+4,lenStrTemp -(strReadBuffer.find("\r\n\r\n")+4));
+							}
+						}
+						printf("Line:%d,sslReadBuffer=%s\n",__LINE__,strReadBuffer.c_str());
+					}
+	
+				}
+	
+			}
+		}
+	}
+	sslLocalSocket->TcpSslDestroy();
+	return strReadBuffer;
+}
+int CTaskMain::BdxVerifyDataHubToken(std::string AuthUser,std::string AuthToken) 
+{
+		int verifyOK = 0;
+		std::string retDataHub;
+
+		retDataHub = BdxGetDatafromDataHub(AuthUser,AuthToken,"","","",0,1);
+
+		printf("Line:%d,BdxVerifyDataHubToken retDataHub=%s\n",__LINE__,retDataHub.c_str());
+		if(retDataHub.find("\"msg\": \"OK\"")!=-1)
+		{
+			verifyOK = 1;
+		}
+		return verifyOK;      
+}
+
+std::string CTaskMain::BdxApiGateWayGetDataHubToken(std::string AuthUser,std::string PassWord) 
+{
+		std::string retDataHub;
+		retDataHub = BdxGetDatafromDataHub(AuthUser,PassWord,"","","",0,2);
+		printf("Line:%d,BdxApiGateWayGetDataHubToken retDataHub=%s",__LINE__,retDataHub.c_str());
+		if(retDataHub.find("\"msg\": \"OK\"")!=-1)
+		{
+			retDataHub = retDataHub.substr(retDataHub.find("token")+ 9 ,32);
+			//retDataHub = retDataHub;
+		}
+		else
+		{
+			retDataHub = "";
+		}
+		return retDataHub;   
+}
+
+std::vector<DATAHUB_ORDER_INFO_S> CTaskMain::BdxApiGetUserOrder(std::string repo,std::string item,std::string user,std::string apitoken) 
+{
+		std::string retDataHub;
+		std::vector<DATAHUB_ORDER_INFO_S> vecDataHubOrder;
+		DATAHUB_ORDER_INFO_S dataHubInfo;
+		//Json::Reader *jReader = new Json::Reader(Json::Features::strictMode()); // turn on strict verify mode
+		Json::Reader *jReader = new Json::Reader();
+		Json::Value jValue,jValue2,jRoot,jResult,jTemp;
+		Json::FastWriter jFastWriter;
+		int lenStrTemp;
+		int jsonFormatValid = 0;
+		char tempSubid[50];
+
+		retDataHub = BdxGetDatafromDataHub(user,apitoken,repo,item,"",0,3);
+		printf("Line:%d,BdxApiGetUserOrder     retDataHub=%s\n",__LINE__,retDataHub.c_str());
+		if(retDataHub.find("\"msg\":\"OK\"")!=-1)
+		{
+			//retDataHub = retDataHub.substr(retDataHub.find("token")+ 9 ,32);
+			if(jReader->parse(retDataHub,jValue))
+			{ 
+				if(jReader->parse(jValue["data"].toStyledString(), jValue))
+				{
+					if(jReader->parse(jValue["results"].toStyledString(), jValue))
+					{						
+							for(unsigned int i=0;i<jValue.size();i++)
+							{
+								printf("Line:%d,i=%d,jValue[i][\"phase\"]=%s",__LINE__,i,jValue[i]["phase"].toStyledString().c_str());
+								
+								if(jValue[i]["phase"].toStyledString()=="1\n")
+								{
+
+									memset(tempSubid,0,50);
+									sprintf(tempSubid,"%ld",atol(jValue[i]["subscriptionid"].toStyledString().c_str()));
+									//dataHubInfo.m_subscriptionID= jValue[i]["subscriptionid"].toStyledString();
+									dataHubInfo.m_subscriptionID = std::string(tempSubid);
+						
+									printf("Line:%d,dataHubInfo.m_subscriptionID=%s\n",__LINE__,dataHubInfo.m_subscriptionID.c_str());
+									
+
+									if(jReader->parse(jValue[i]["plan"].toStyledString(), jValue2))
+									{
+										jsonFormatValid = 1;
+										memset(tempSubid,0,50);
+										sprintf(tempSubid,"%ld",atol(jValue2["units"].toStyledString().c_str()));
+										dataHubInfo.m_units= std::string(tempSubid);
+
+										memset(tempSubid,0,50);
+										sprintf(tempSubid,"%ld",atol(jValue2["expire"].toStyledString().c_str()));
+										dataHubInfo.m_expireTime= std::string(tempSubid);
+										
+										printf("Line:%d,dataHubInfo.m_units=%s",__LINE__,dataHubInfo.m_units.c_str());
+										printf("Line:%d,dataHubInfo.m_expireTime=%s",__LINE__,dataHubInfo.m_expireTime.c_str());
+										vecDataHubOrder.push_back(dataHubInfo);
+
+									}
+								}
+							}
+						
+					}
+				 }
+			}
+			if( !jsonFormatValid )
+			{
+				retDataHub = "";
+			}			
+		  //retDataHub = retDataHub;
+		}
+
+		delete jReader; 
+		return vecDataHubOrder;   
+}
+
+bool CTaskMain::BdxApiSetUserOrderStatus(std::string user,std::string subid,std::string repo,std::string item,std::string token) 
+{
+		std::string retDataHub;
+		bool status = false;
+		retDataHub = BdxGetDatafromDataHub(user,token,repo,item,subid,0,4);
+		if(retDataHub.find("\"msg\":\"OK\"")!=-1)
+		{
+			status = true;
+		}
+		return status;   
+}
+std::string CTaskMain::BdxApiUpdateUserOrder(std::string user,std::string subid,std::string repo,std::string item,std::string token,long used) 
+{
+		std::string retDataHub;
+		retDataHub = BdxGetDatafromDataHub(user,token,repo,item,subid,used,5);
+		printf("Line:%d,BdxApiGateWayGetDataHubToken retDataHub=%s",__LINE__,retDataHub.c_str());
+		if(retDataHub.find("\"msg\": \"OK\"")!=-1)
+		{
+			retDataHub = retDataHub.substr(retDataHub.find("token")+ 9 ,32);
+			//retDataHub = retDataHub;
+		}
+		else
+		{
+			retDataHub = "";
+		}
+		return retDataHub;   
 }
 
 std::string CTaskMain::GenPasswordDigest(std::string utcTime, std::string nonce, std::string appSecret)

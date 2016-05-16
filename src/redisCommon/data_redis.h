@@ -55,9 +55,12 @@ public:
 	bool Hkeys(const char *key,deque<string> &fields);
 	bool Hvals(const char *key,deque<string> &values);
 	bool IncrValue(const char* key, int32_t expiration=0);
-
 	// key operator
 	bool GetKeys(const char *regular_key, deque<string> &keys);
+	bool SetValueSortedSet(const char *key,const char *score,const char *value);
+	bool GetValueSortedSet(const char *key, string &value);
+	bool DelValue(const char* key, const char *value, int32_t expiration);
+	bool RemoveSortedSet(const char *key, string &value);
 	bool DeleteKeys(deque<string> &keys);
 	bool DeleteKey(const char *key);
 

@@ -183,7 +183,7 @@ bool CDataRedis::GetValue(const char *key, string &value) {
 	redisReply *reply = (redisReply*)redisCommand(context_, "GET %s", key);
 	if (reply==NULL || reply->type == REDIS_REPLY_ERROR||reply->len==0) {
 		if(reply) {
-			//printf("fail to get value, key: %s, error: %s.\n",key,reply->str);
+			printf("fail to get value, key: %s, error: %s.\n",key,reply->str);
 			freeReplyObject(reply);
 		}
 		DisConnect();//chenyg add 20150714
@@ -197,6 +197,97 @@ bool CDataRedis::GetValue(const char *key, string &value) {
 	reply = NULL;
 	return true;
 }
+
+bool CDataRedis::GetValueSortedSet(const char *key, string &value) {
+	assert(NULL!=key);
+	if(!KeepConnect()) return false;
+	//printf("key=%s\n",key);
+	redisReply *reply = (redisReply*)redisCommand(context_, "ZRANGE %s 0 0", key);
+	printf("Line:%d,GetValueSortedSet reply->type =%d,reply->len=%d\n",__LINE__,reply->type,reply->len);
+	if (reply==NULL || reply->type != REDIS_REPLY_ARRAY) {
+		if(reply) {
+			printf("fail to get value, key: %s, error: %s.\n",key,reply->str);
+			freeReplyObject(reply);
+		}
+		DisConnect();//chenyg add 20150714
+		return false;
+	}else {
+	 
+	 	printf("Line:%d,reply->elements=%d\n",__LINE__,reply->elements);
+		int i ;
+		for(i= 0 ;i<reply->elements;i++)
+		{
+			redisReply *childreply = reply->element[i];
+			if(childreply->type==REDIS_REPLY_STRING)
+			{
+				value.assign(childreply->str,childreply->len);
+				//value = std::string(childreply->str);
+				printf("Line:%d,value=%s\n",__LINE__,value.c_str());
+			}
+			//freeReplyObject(childreply);
+			//childreply = NULL;
+		}
+		if(value.length()==0)
+		{
+			freeReplyObject(reply);
+			reply = NULL;
+			return false;
+		}
+		//value.assign(reply->str,reply->len);
+	}
+	freeReplyObject(reply);
+	reply = NULL;
+	return true;
+}
+bool CDataRedis::RemoveSortedSet(const char *key, string &value) {
+	assert(NULL!=key);
+	if(!KeepConnect()) return false;
+	//printf("key=%s\n",key);
+	redisReply *reply = (redisReply*)redisCommand(context_, "zremrangebyrank %s 0 0", key);
+	printf("Line:%d,GetValueSortedSet reply->type =%d,reply->len=%d\n",__LINE__,reply->type,reply->len);
+	if (reply==NULL || reply->type == REDIS_REPLY_ERROR) {
+		if(reply) {
+			printf("fail to get value, key: %s, error: %s.\n",key,reply->str);
+			freeReplyObject(reply);
+		}
+		DisConnect();//chenyg add 20150714
+		return false;
+	}else {
+	 	value.assign(reply->str,reply->len);
+	 	printf("Line:%d,reply->elements=%d,value=%s\n",__LINE__,reply->elements,value.c_str());
+		
+	}
+	freeReplyObject(reply);
+	reply = NULL;
+	return true;
+}
+
+
+
+bool CDataRedis::SetValueSortedSet(const char *key,const char *score,const char *value) {
+	assert(key);
+	assert(value);
+	if(!KeepConnect()) return false;
+
+	redisReply *reply = NULL;
+	reply = (redisReply*)redisCommand(context_,"ZADD %s %s %s", key,score,value);
+
+	if (reply==NULL || reply->type == REDIS_REPLY_ERROR) {
+		if (reply) {
+			printf("Fail to set value, key: %s, value: %s, error: %s.\n",key,value,reply->str);
+			freeReplyObject(reply);
+		}
+		DisConnect();
+		return false;
+	}
+
+	freeReplyObject(reply);
+	reply = NULL;
+	return true;
+
+}
+
+
 bool CDataRedis::Rpush(const char *key,const char *item) {
 	assert(key);
 	assert(item);
@@ -304,7 +395,30 @@ bool CDataRedis::SetValue(const char* key, const char *value, int32_t expiration
 	return true;
 }
 
+bool CDataRedis::DelValue(const char* key, const char *value, int32_t expiration) {
+	assert(key);
+	assert(value);
+	if(!KeepConnect()) return false;
 
+	redisReply *reply = NULL;
+	if (expiration > 0) {
+		reply = (redisReply*)redisCommand(context_,"DEL %s", key);
+	} else {
+		reply = (redisReply*)redisCommand(context_,"SET %s", key);
+	}
+	if (reply==NULL || reply->type == REDIS_REPLY_ERROR) {
+		if (reply) {
+			printf("Fail to set value, key: %s, value: %s, error: %s.\n",key,value,reply->str);
+			freeReplyObject(reply);
+		}
+		DisConnect();
+		return false;
+	}
+
+	freeReplyObject(reply);
+	reply = NULL;
+	return true;
+}
 bool CDataRedis::Sadd(const char *key, const char *mumb) {
 	if(!KeepConnect()) return false;
 
