@@ -147,9 +147,9 @@ bool CUserQueryMain::BdxInitConfig(const char *pszCfgFile)
 			BdxGetServerPrms(&CConf, szSection, m_stServerInfo.m_stGoodsServer);
 		}else if(strcmp(szSection, "[TOKENSERVER]") == 0) {
 			BdxGetServerPrms(&CConf, szSection, m_stServerInfo.m_stTokenServer);
-		}*/else if(strcmp(szSection, "[MYSQLSERVER]") == 0) {
+		}else if(strcmp(szSection, "[MYSQLSERVER]") == 0) {
 			BdxGetMysqlServerPrms(&CConf, szSection, m_stMysqlInfo);
-		}else if(strcmp(szSection, "[LOCALSERVER]") == 0) {
+		}*/else if(strcmp(szSection, "[LOCALSERVER]") == 0) {
 			BdxGetServerPrms(&CConf, szSection, m_stServerInfo.m_stLocalServer);
 	  }  else if(strcmp(szSection, "[WORKTHREADS]") == 0) {
 			BdxGetThreadsPrm(&CConf, szSection);

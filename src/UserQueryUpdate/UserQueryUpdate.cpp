@@ -42,7 +42,7 @@ CUserQueryUpdate::CUserQueryUpdate(const IPPORT_S &stTokenServer,const MYSQL_SER
 	char chIdx  [10];
     //m_pTokenRedis = new CDataAdapter;
     cTaskMonitorHuaWei = new CTaskMain;
-    m_stMysqlServerInfo = new CMYSQL;
+    //m_stMysqlServerInfo = new CMYSQL;
 	sprintf(chCount,"%d",stTokenServer.m_count);
 	sprintf(chPort,"%d",stTokenServer.m_uiPort);
 	sprintf(chIdx,"%d",stTokenServer.m_idx);
@@ -64,14 +64,14 @@ CUserQueryUpdate::CUserQueryUpdate(const IPPORT_S &stTokenServer,const MYSQL_SER
 	LOG(DEBUG,"mySqlInfo.pchPassWord=%s",mySqlInfo.pchPassWord);
 	LOG(DEBUG,"mySqlInfo.pchDbName=%s",mySqlInfo.pchDbName);
 	printf("======================================\n");
-	m_stMysqlServerInfo->InitMysql(mySqlInfo.m_stMysqlLinkInfo.m_pchIp,mySqlInfo.m_stMysqlLinkInfo.m_uiPort,mySqlInfo.pchUserName,mySqlInfo.pchPassWord,mySqlInfo.pchDbName);
+	//m_stMysqlServerInfo->InitMysql(mySqlInfo.m_stMysqlLinkInfo.m_pchIp,mySqlInfo.m_stMysqlLinkInfo.m_uiPort,mySqlInfo.pchUserName,mySqlInfo.pchPassWord,mySqlInfo.pchDbName);
 
 }
 
 CUserQueryUpdate::~CUserQueryUpdate() {
 	// TODO Auto-generated destructor stub
 	//delete m_pTokenRedis ;
-    delete m_stMysqlServerInfo ;
+    //delete m_stMysqlServerInfo ;
 }
 
 void CUserQueryUpdate::GetMysqlFieldsUserInfo(std::string strUserInfo,BDXPERMISSSION_S &mVecFieldsUser,std::string &mUserName) 
@@ -534,7 +534,8 @@ void CUserQueryUpdate::Core()
 		//MonitorRemoteApiHuaWei();
 									
 		#endif //__MONITOR_API__
-		
+
+		#if 0
 		while(times--)
 		{
 				temp_mapUserInfo.clear();
@@ -619,8 +620,10 @@ void CUserQueryUpdate::Core()
 
 				}
 				
-		sleep(60);
+		
 		}	
+		#endif
+		sleep(3600);
 	}
 
 }
