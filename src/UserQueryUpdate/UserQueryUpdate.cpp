@@ -856,7 +856,7 @@ void CUserQueryUpdate::Core()
 				}	
 		}	
 		#endif
-		sleep(300);
+		sleep(600);
 	}
 
 }
