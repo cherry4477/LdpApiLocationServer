@@ -537,6 +537,27 @@ bool CDataRedis::Sremove(const char *key,const set<string> &mumbs) {
 }
 
 
+bool CDataRedis::Smove(const char *key,const char *dstkey,const char *mumb) {
+
+	if(!KeepConnect()) return false;
+
+	char cmd[4096] = {0};
+	snprintf(cmd,4096,"smove %s %s %s",key,dstkey,mumb);
+
+	redisReply *reply = (redisReply*)redisCommand(context_, cmd);
+	if (reply==NULL || reply->type == REDIS_REPLY_ERROR) {
+		if (reply) {
+			printf("Srem command: %s, error: %s.\n", cmd,reply->str);
+			freeReplyObject(reply);
+		}
+		DisConnect();
+		return false;
+	}
+	freeReplyObject(reply);
+	reply = NULL;
+	return true;
+}
+
 bool CDataRedis::Hset(const char *key, const char *field, const char *value) {
 
 	if(!KeepConnect()) return false;

@@ -27,6 +27,10 @@ public:
 	virtual ~CUserQueryUpdate();
 	void MonitorRemoteApiHuaWei();
 	void MonitorRemoteApiWangGuan();
+	std::string BdxUserGetCurrentDate(const time_t ttime=0);
+	std::string BdxApiUpdateUserOrder(std::string user,std::string subid,std::string repo,std::string item,std::string token,long used) ;
+	std::string BdxApiGateWayGetDataHubToken(std::string AuthUser="",std::string PassWord="") ;
+	std::string BdxGetDatafromDataHub(std::string AuthUser,std::string AuthToken,std::string repo,std::string item,std::string subid,long used,int type);
 	bool MapIsEqual(std::map<std::string,BDXPERMISSSION_S> &srcMap,std::map<std::string,BDXPERMISSSION_S> &destMap);
 	void SwapMap(std::map<std::string,BDXPERMISSSION_S> &srcMap,std::map<std::string,BDXPERMISSSION_S> &destMap);
 	void GetMysqlFieldsUserInfo(std::string strUserInfo,BDXPERMISSSION_S &mVecFieldsUser,std::string &mUserName);

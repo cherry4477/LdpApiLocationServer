@@ -48,6 +48,7 @@ public:
 	bool Smembers(const char *key, deque<string> &membs);
 	bool Sremove(const char *key,const char *mumb);
 	bool Sremove(const char *key,const set<string> &mumbs);
+	bool Smove(const char *key,const char *dstkey,const char *mumb);
 
 	// hash operator
 	bool Hset(const char *key, const char *field, const char *value);

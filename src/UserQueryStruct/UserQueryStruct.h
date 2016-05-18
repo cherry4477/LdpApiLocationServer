@@ -106,7 +106,6 @@
 #define KEY_AUTH_ID "authID"
 #define KEY_CUST_NAME "custName"
 
-
 #define REQ_TYPE 		"GET"
 
 #define KEY_USER		"user"
@@ -123,6 +122,20 @@
 #define NULLSTRING    	 string("")
 #define LEFTMIDBRACE     string("[")
 #define RIGHTMIDBRACE    string("]")
+
+
+#define KEY_startOrderID  "orderid"
+#define KEY_startToken  "token"
+#define KEY_apiGateWayAdmin  "chenyg@asiainfo.com"
+#define KEY_startOrderCount   "order_count"
+#define KEY_startOrderLimit   "order_limit"
+#define KEY_startOrderStatus  "order_status"
+#define KEY_startOrderExpire  "order_expire"
+
+#define KEY_DELIMITER "#"
+
+
+
 //#define NULLSTRING    	 string("")
 
 

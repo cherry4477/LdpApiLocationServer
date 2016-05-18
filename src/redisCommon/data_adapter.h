@@ -30,6 +30,10 @@ public:
 	bool UserGetSortedSet(string &uid,string &rule);
 	bool UserRemoveSortedSet(string &uid,string &rule);
 	bool UserPutOrderSet(string &key,const string &score,const string &member);
+	bool UserSmove(string &uid,string &dstuid,string &rule);
+
+	bool UserSmembers(string &uid,deque<string> &rule);
+	bool UserSadd(string &uid,string &rule);
 	bool UserDel(string &uid,const string &rule);
 	bool UserIncr(string &uid,int32_t itime_expire =0);
 	bool UserIncrBy(string &uid,int32_t increment);

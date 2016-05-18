@@ -28,12 +28,11 @@ CTcpSocket::CTcpSocket(const in_port_t in_portPort, const std::string& strIp, co
  : m_in_portPort(in_portPort), m_strIp(strIp), m_uiTimeout(uiTimeout)
 {	
 	m_iSockfd = socket(AF_INET, SOCK_STREAM, 0);
-	printf("Line:%d,create m_iSockfd=%d\n",__LINE__,m_iSockfd);
+	//printf("Line:%d,create m_iSockfd=%d\n",__LINE__,m_iSockfd);
 	if (m_iSockfd == -1) {
 		throw std::runtime_error("get socketfd error.");
 	}
 	m_bConnect = false;
-	printf("m_iSockfd=%d\n",m_iSockfd);
 }
 
 /*
@@ -41,13 +40,11 @@ CTcpSocket::CTcpSocket(const in_port_t in_portPort, const std::string& strIp, co
  */
 CTcpSocket::~CTcpSocket() throw()
 {
-	
-	//printf("m_iSockfd=%d,~CTcpSocket......\n",m_iSockfd);
 	struct linger so_linger;
 	so_linger.l_onoff = true;
 	so_linger.l_linger = 0;
 	setsockopt(m_iSockfd,SOL_SOCKET,SO_LINGER,&so_linger,sizeof(so_linger));
-	printf("clsing socket ~~~~~~~~~~CTcpSocket\n");
+	printf("Line:%d,clsing socket ~~~~~~~~~~CTcpSocket\n",__LINE__);
 	if(m_iSockfd != -1){
 		::close(m_iSockfd);
 		m_iSockfd = -1;
@@ -399,7 +396,7 @@ bool CTcpSocket:: TcpClose()
 	setsockopt(m_iSockfd,SOL_SOCKET,SO_LINGER,&so_linger,sizeof(so_linger));
 	//printf("m_bConnect=%d,m_iSockfd=%d\n",m_bConnect,m_iSockfd);
 	if(m_bConnect) {
-	printf("Line:%d,before close socket %d\n",__LINE__,m_iSockfd);
+	//printf("Line:%d,before close socket %d\n",__LINE__,m_iSockfd);
 		if(m_iSockfd != -1)
 		{
 			::close(m_iSockfd);
@@ -407,7 +404,7 @@ bool CTcpSocket:: TcpClose()
 		}
 		m_bConnect = false;
 	}
-	printf("Line:%d,after close socket %d\n",__LINE__,m_iSockfd);
+	//printf("Line:%d,after close socket %d\n",__LINE__,m_iSockfd);
 	return true;
 }
 int CTcpSocket::EncodingBase64(char * pInput, char * pOutput)

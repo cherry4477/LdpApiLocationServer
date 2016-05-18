@@ -68,6 +68,54 @@ bool CDataAdapter::UserGet(string &uid,string &rule) {
 	return data_[idx].GetValue(uid.c_str(),rule);
 }
 
+bool CDataAdapter::UserSmove(string &uid,string &dstuid,string &rule) {
+	//uint64_t postkey = m_clMd5.md5_sum((unsigned char *)(uid.c_str()),uid.length());
+	
+	m_clMd5.Md5Init();    
+	m_clMd5.Md5Update((unsigned char *)uid.c_str(),uid.length());
+	unsigned char  pszParamSign[16];    
+	m_clMd5.Md5Final(pszParamSign);
+	unsigned long int postkey = *(unsigned long int*)pszParamSign;
+	
+	uint32_t idx = postkey % serv_count_;
+
+	MutexLock lock(&lock_[idx]);
+
+	return data_[idx].Smove(uid.c_str(),dstuid.c_str(),rule.c_str());
+}
+
+bool CDataAdapter::UserSmembers(string &uid,deque<string> &rule) {
+	//uint64_t postkey = m_clMd5.md5_sum((unsigned char *)(uid.c_str()),uid.length());
+	
+	m_clMd5.Md5Init();    
+	m_clMd5.Md5Update((unsigned char *)uid.c_str(),uid.length());
+	unsigned char  pszParamSign[16];    
+	m_clMd5.Md5Final(pszParamSign);
+	unsigned long int postkey = *(unsigned long int*)pszParamSign;
+	
+	uint32_t idx = postkey % serv_count_;
+
+	MutexLock lock(&lock_[idx]);
+
+	return data_[idx].Smembers(uid.c_str(),rule);
+}
+
+bool CDataAdapter::UserSadd(string &uid,string &rule) {
+	//uint64_t postkey = m_clMd5.md5_sum((unsigned char *)(uid.c_str()),uid.length());
+	
+	m_clMd5.Md5Init();    
+	m_clMd5.Md5Update((unsigned char *)uid.c_str(),uid.length());
+	unsigned char  pszParamSign[16];    
+	m_clMd5.Md5Final(pszParamSign);
+	unsigned long int postkey = *(unsigned long int*)pszParamSign;
+	
+	uint32_t idx = postkey % serv_count_;
+
+	MutexLock lock(&lock_[idx]);
+
+	return data_[idx].Sadd(uid.c_str(),rule.c_str());
+}
+
 bool CDataAdapter::UserGetSortedSet(string &uid,string &rule) {
 	//uint64_t postkey = m_clMd5.md5_sum((unsigned char *)(uid.c_str()),uid.length());
 	
