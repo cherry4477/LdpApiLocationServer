@@ -434,6 +434,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 						strLimitOrderId = strMidLimitOrderId + ssmoidValue;
 						strStatusOrderId = strMidStatusOrderId + ssmoidValue;
 						strExpireOrderId = strMidExpireOrderId + ssmoidValue;
+						valueUserRepoItemSubid = startUserRepoItemSubid + ssmoidValue;
 						strTempSubID = ssmoidValue;
 						
 
