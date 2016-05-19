@@ -876,7 +876,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 			LOG(DEBUG,"Local Store strTelNo=%s",strTelNo.c_str());
 			printf("line %d,strTelNo: %s\n",__LINE__,strTelNo.c_str());
 			//if(!m_pDataRedis->UserPut(strTelNo,mResValueLocal))
-			if(!m_pDataRedis->UserPutExpire(strTelNo,mResValueLocal,1825*86400))//expired 5 years
+			if(!m_pDataRedis->UserPutExpire(strTelNo,stResponseInfo.mResValue,1825*86400))//expired 5 years
 			{		
 				 	LOG(ERROR, "[thread: %d]Set HotKey Error.", m_uiThreadId);								
 			}
