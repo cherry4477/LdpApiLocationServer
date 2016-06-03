@@ -17,7 +17,7 @@ pthread_mutex_t mutex;
 std::string g_strTokenString = "";
 u_int  g_iNeedUpdateToken = 0;
 extern u_int  InitSSLFlag ;
-extern std::string g_strDataHubToken;
+
 
 
 extern	IPPORT_S m_stMonitorApi;
@@ -29,6 +29,7 @@ extern	string m_strRcptTo;
 extern	string m_strSubject;
 extern	string m_strErrorMsg;
 
+extern std::string g_strDataHubToken;
 std::string g_strCurrentDate ;
 
 
@@ -648,8 +649,7 @@ void CUserQueryUpdate::Core()
 	Json::Value jValue,jRoot,jResult;
 	Json::Reader jReader;
 	Json::FastWriter jFastWriter;
-	std::string needUpdateOrder="need_updated_datahub_order";
-	std::string alreadyUpdateOrder="already_updated_datahub_order";
+
 
 	std::string strMysqlRecord;
 	const char *pchSqlPermissions = "select access_keyid,secret_privatekey,query_count,goods_count,goods_perm,permissions from dmp_user_permissions";
@@ -659,6 +659,8 @@ void CUserQueryUpdate::Core()
 	std::map<std::string,BDXPERMISSSION_S> temp_mapUserInfo;
 	std::string tempCurrentDate;
 	deque<string> setMembers;
+	std::string needUpdateOrder="need_updated_datahub_order";
+	std::string alreadyUpdateOrder="already_updated_datahub_order";
 	deque<string>::iterator itSetMembers;
 	std::string statusOrder,countOrder;
 	std::string mid_statusOrder= "order_status";

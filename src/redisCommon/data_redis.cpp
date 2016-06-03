@@ -198,7 +198,8 @@ bool CDataRedis::GetValue(const char *key, string &value) {
 	return true;
 }
 
-bool CDataRedis::GetValueSortedSet(const char *key, string &value) {
+bool CDataRedis::GetValueSortedSet(const char *key, string &value) 
+{
 	assert(NULL!=key);
 	if(!KeepConnect()) return false;
 	//printf("key=%s\n",key);

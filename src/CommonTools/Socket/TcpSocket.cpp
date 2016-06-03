@@ -741,7 +741,7 @@ int CTcpSocket::TcpSslInitEnv()
 
 		OpenSSL_add_all_algorithms();
 		OpenSSL_add_all_ciphers();
-	//SSL_load_error_strings();
+		//SSL_load_error_strings();
 		*/
 
 	//ssl_method = const_cast<SSL_METHOD *>(SSLv23_client_method());
@@ -798,9 +798,11 @@ int CTcpSocket::TcpSslReadLen( void* buf, int nBytes)
 {
         int nleft;
         int nread;
+		int totalRead;
         //char *ptr;
         //ptr = buf;
         nleft = nBytes;
+		
         
         
         do {
@@ -831,13 +833,14 @@ int CTcpSocket::TcpSslReadLen( void* buf, int nBytes)
                                 return -1;
                 
                 }//end switch
-//end:
 
                 nleft=nleft-nread;
+				totalRead = totalRead + nread;
 				//int sss=SSL_pending(ssl);
-        }while( nleft > 0 );
-
-        return (nBytes-nleft);
+         }
+		 while( nleft > 0 );
+        //return (nBytes-nleft);
+        return totalRead;
 }
 
 

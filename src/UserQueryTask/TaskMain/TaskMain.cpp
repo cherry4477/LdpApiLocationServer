@@ -263,6 +263,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 	//int isExpire = 0, iIsLocal=0,iRemoteApiFlag = 0;
 	//int iOperator = 0;
 	string strCreateTime,strFirst3Bit,strCreateTime2,strAction,strLastDataTime,strLastDataTime2,mResValueLocal,mResValueRemote;
+	std::string str_urlDecode;
 	//struct tm ts;
 	//time_t timetNow,timetCreateTime,timetCreateTime2;
 	//Json::Reader jReader;
@@ -289,7 +290,13 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 	iRes = m_pclSock->TcpRead(m_pszAdxBuf, _8KBLEN);
 
   	LOG(DEBUG,"Requrest= %s\n",m_pszAdxBuf);  
-	//printf("ThreadID: %d,Line%d,Requrest= %s\n",m_uiThreadId,__LINE__,m_pszAdxBuf);  
+	printf("ThreadID: %d,Line%d,Requrest= %s\n",m_uiThreadId,__LINE__,m_pszAdxBuf);  
+	str_urlDecode=url_decode((char*)m_pszAdxBuf);
+	memset(m_pszAdxBuf, 0, _8KBLEN);
+	sprintf(m_pszAdxBuf,"%s",str_urlDecode.c_str());
+
+	
+	printf("ThreadID: %d,Line%d,Requrest= %s\n",m_uiThreadId,__LINE__,m_pszAdxBuf);  
 	if(iRes <= (int)http.length()) 
 	{		
 		LOG(DEBUG, "[thread: %d]Read Socket Error [%d].", m_uiThreadId, iRes);
@@ -427,7 +434,7 @@ int CTaskMain::BdxGetHttpPacket(BDXREQUEST_S& stRequestInfo,BDXRESPONSE_S &stRes
 					strMidLimitOrderId   = startOrderLimit  + KEY_DELIMITER + startUserRepoItemSubid;
 					strMidStatusOrderId  = startOrderStatus + KEY_DELIMITER + startUserRepoItemSubid;
 					strMidExpireOrderId  = startOrderExpire + KEY_DELIMITER + startUserRepoItemSubid;
-
+					printf("Line:%d,strUserOrderId=%s\n",__LINE__,strUserOrderId.c_str());
 					if(m_pDataRedis->UserGetSortedSet(strUserOrderId,ssmoidValue))
 					{
 						strCountOrderId = strMidCountOrderId + ssmoidValue;
@@ -1128,7 +1135,14 @@ std::string CTaskMain::BdxGetDatafromDataHub(std::string AuthUser,std::string Au
 	char sslReadBuffer[_8KBLEN];
 	char tempBuffer[PACKET];
 	std::string strReadBuffer;
+	//#define __TEST__
+	#ifdef __TEST__
 	std::string datahubIP = "10.1.235.98";
+	std::string datahubHost = "10.1.235.98";
+	#else
+	std::string datahubIP = "54.223.214.188";
+	std::string datahubHost = "hub.dataos.io";
+	#endif
 	uint16_t 	datahubPort = 443;
 	CTcpSocket* sslLocalSocket; 	
 	string strType;
@@ -1137,13 +1151,20 @@ std::string CTaskMain::BdxGetDatafromDataHub(std::string AuthUser,std::string Au
 	if( type == 1 )
 	{
 		strType ="verify user token";
-		sprintf(m_httpReqVerifyToken,"GET /api/valid HTTP/1.1\r\nHost: %s\r\nAuthorization:Token %s\r\nAuthuser: %s\r\n\r\n",datahubIP.c_str(),AuthToken.c_str(),AuthUser.c_str());
-		//printf("Line:%d,BdxVerifyDataHubToken\n",__LINE__);
+		sprintf(m_httpReqVerifyToken,"GET /api/valid HTTP/1.1\r\nHost: %s\r\nAuthorization:Token %s\r\nAuthuser: %s\r\n\r\n",datahubHost.c_str(),AuthToken.c_str(),AuthUser.c_str());
+		printf("Line:%d,BdxVerifyDataHubToken\n",__LINE__);
+		printf("Line:%d,m_httpReqVerifyToken=%s\n",__LINE__,m_httpReqVerifyToken);
 	}
 	if( type == 2 )
 	{
 		strType ="get gateway token";
+		#ifdef __TEST__
 		sprintf(m_httpReqVerifyToken,"GET /api/ HTTP/1.1\r\nHost: %s\r\nAuthorization: Basic Y2hlbnlnQGFzaWFpbmZvLmNvbToxYmJkODg2NDYwODI3MDE1ZTVkNjA1ZWQ0NDI1MjI1MQ==\r\n\r\n",datahubIP.c_str());
+		#else
+		sprintf(m_httpReqVerifyToken,"GET /api/ HTTP/1.1\r\nHost: %s\r\nAuthorization: Basic YWRtaW5fY2hlbnlnQGFzaWFpbmZvLmNvbTo4ZGRjZmYzYTgwZjQxODljYTFjOWQ0ZDkwMmMzYzkwOQ==\r\n\r\n",datahubIP.c_str());
+		#endif
+
+
 	}
 	if( type == 3 )
 	{
